@@ -1,5 +1,8 @@
-#include "cv.h"
-#include "highgui.h"
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
+
+//#include "cv.h"
+//#include "highgui.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -41,13 +44,16 @@ int main(int argc, char** argv){
 	// fps counter end
 	
 	//cvNamedWindow("Original", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow("Resized", CV_WINDOW_AUTOSIZE);
+	//cvNamedWindow("Resized", CV_WINDOW_AUTOSIZE);
 	
 	cv::Mat foreground, image;
 	cv::BackgroundSubtractorMOG2 mog;	
 	if (doBGS){
-		cvNamedWindow("Foreground", CV_WINDOW_AUTOSIZE);
+		//cvNamedWindow("Foreground", CV_WINDOW_AUTOSIZE);
 	}
+
+	//CvVideoWriter* outStream = cvCreateVideoWriter(const char* filename, int fourcc, double fps, CvSize frame_size, int is_color=1 )	
+	const char* outFile = "./output.mjpeg";
 	
 	// The main loop
 	while(1){
@@ -70,10 +76,15 @@ int main(int argc, char** argv){
 			//medianBlur(foreground,foreground,1);
 			erode(foreground,foreground,cv::Mat());
 			dilate(foreground,foreground,cv::Mat());
-			cv::imshow("Foreground", foreground);
+			//cv::imshow("Foreground", foreground);
 		}
-		//cvShowImage("Original", srcImg);
-		cvShowImage("Resized", srcImgRes);
+		//cvShowImage("Resized", srcImgRes);
+		
+		
+		// MJPEG BEGIN
+		CvVideoWriter* outStream = cvCreateVideoWriter(outFile, CV_FOURCC('M','J','P','G'), 2, cvSize((int)(srcImg->width*percent/100), (int)(srcImg->height*percent/100)), true );
+		cvWriteFrame(outStream, srcImgRes);
+		// MJPEG END
 		
 		// fps counter begin
 		time(&end);
@@ -91,9 +102,9 @@ int main(int argc, char** argv){
 	
 	cvReleaseCapture(&capture);
 	//cvDestroyWindow("Original");
-	cvDestroyWindow("Resized");
+	//cvDestroyWindow("Resized");
 	if (doBGS)
-		cvDestroyWindow("Foreground");
+		//cvDestroyWindow("Foreground");
 	
 	return 0;
 }
