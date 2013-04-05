@@ -82,8 +82,8 @@ int main(int argc, char** argv){
 		
 		
 		// MJPEG BEGIN
-		CvVideoWriter* outStream = cvCreateVideoWriter(outFile, CV_FOURCC('M','J','P','G'), 2, cvSize((int)(srcImg->width*percent/100), (int)(srcImg->height*percent/100)), true );
-		cvWriteFrame(outStream, srcImgRes);
+		//CvVideoWriter* outStream = cvCreateVideoWriter(outFile, CV_FOURCC('M','J','P','G'), 2, cvSize((int)(srcImg->width*percent/100), (int)(srcImg->height*percent/100)), true );
+		//cvWriteFrame(outStream, srcImgRes);
 		// MJPEG END
 		
 		// fps counter begin
