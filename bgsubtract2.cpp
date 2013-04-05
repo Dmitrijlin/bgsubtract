@@ -28,6 +28,13 @@ const char* keys =
 ;
 */
 
+void printusage(){
+		cout<<"Usage:\n";
+		cout<<"  ./bgsubtract2 /var/www/output.mjpeg			will write at given location\n";
+		cout<<"  ./bgsubtract2 /var/www/output.mjpeg -bgs		showing background subtraction\n";
+		cout<<endl;
+}
+
 int main(int argc, char** argv)
 {
 	char* outFile = "./out.mjpg";
@@ -36,6 +43,11 @@ int main(int argc, char** argv)
     bool doBGS = false;
     bool writeOut = true;
     bool displayWindows = false;
+    
+    if (argc < 2) {
+		printusage();
+		return -1;
+	}
     
 	if (argv[1])
 		outFile = argv[1];
