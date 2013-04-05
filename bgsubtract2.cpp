@@ -42,9 +42,11 @@ int main(int argc, char** argv)
 	if (argv[1])
 		outFile = argv[1];
     
-    VideoCapture cap(0); // open the default camera
-    if(!cap.isOpened())  // check if we succeeded
+    VideoCapture cap(0);
+    if(!cap.isOpened()){
+		cout<<"Can't open camera!\n";
         return -1;
+	}
 	
 	/**
 	CommandLineParser parser(argc, argv, keys);
