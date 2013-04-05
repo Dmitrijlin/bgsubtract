@@ -3,13 +3,12 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/video/background_segm.hpp"
 
-#include <stdio.h>
+#include <iostream>
 #include <time.h>
 #include <limits.h>
 
-#include <string>
-
 using namespace cv;
+using namespace std;
 
 Mat bgsubtract(Mat frame){
 	Mat foreground;
@@ -20,25 +19,27 @@ Mat bgsubtract(Mat frame){
 	return foreground;
 }
 
-
+/**
 const char* keys = 
-{
 	"{r resize		|	1	| resize factor, default=1}"
 	"{b bgs			|		| do background subtraction}"
-};
+;
+*/
 
 int main(int argc, char** argv)
 {
+    const char* outFile = "./out.mjpg";
+	int resizeFactor = 1;
+    bool doBGS = false;
+    bool writeOut = true;
+    bool displayWindows = false;
+    
     VideoCapture cap(0); // open the default camera
     if(!cap.isOpened())  // check if we succeeded
         return -1;
 	
-	int resizeFactor = 1;
-    bool doBGS = false;
 	/**
 	CommandLineParser parser(argc, argv, keys);
-	
-	
 	if (!parser.check()){
 		parser.printErrors();
 		return 0;
@@ -50,6 +51,7 @@ int main(int argc, char** argv)
 	if (parser.has("resize"))
 		resizeFactor = parser.get<int>("resize");
 	*/
+	
     int imgSizeX = resizeFactor * 320;
     int imgSizeY = resizeFactor * 240;
     
@@ -60,15 +62,11 @@ int main(int argc, char** argv)
 	double fps;
 	// fps counter end
 	
-	namedWindow("Source",1);
-	
 	Mat foreground;
 	BackgroundSubtractorMOG2 mog;	
-	if (doBGS){
-		namedWindow("Background Subtraction", 1);
-	}
-	
-    const char* outFile = "./out.mjpg";
+
+	if (displayWindows) namedWindow("Source",1);
+	if (displayWindows && doBGS) namedWindow("Background Subtraction", 1);
     
     while(1)
     {
@@ -87,21 +85,23 @@ int main(int argc, char** argv)
 			threshold(foreground, foreground, 128, 255, THRESH_BINARY);
 			erode(foreground, foreground, Mat());
 			
-			imshow("Background Subtraction", foreground);
+			if(displayWindows) imshow("Background Subtraction", foreground);
 		}
         
-        imshow("Source", frameResized);
-        /**
-        VideoWriter outStream(outFile, CV_FOURCC('M','J','P','G'), 2, Size(imgSizeX, imgSizeY), true);
-        if (outStream.isOpened())
-			outStream.write(frameResized);
-        */
+        if (displayWindows) imshow("Source", frameResized);
+        
+        if (writeOut) {
+			VideoWriter outStream(outFile, CV_FOURCC('M','J','P','G'), 2, Size(imgSizeX, imgSizeY), true);
+			if (outStream.isOpened())
+				outStream.write(frameResized);
+        }
 		// fps counter begin
 		time(&end);
 		counter++;
 		sec = difftime(end, start);
 		fps = counter/sec;
-		printf("%.2f fps\n", fps);
+		cout.precision(2);
+		cout<<fixed<<fps<<" fps\n";
 		if (counter == (INT_MAX - 1000)) counter = 0;
 		// fps counter end
 		if ( (waitKey(10) & 255) == 27 ) break;
