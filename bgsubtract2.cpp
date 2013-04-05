@@ -4,6 +4,8 @@
 #include "opencv2/video/background_segm.hpp"
 
 #include <iostream>
+#include <cstring>
+
 #include <time.h>
 #include <limits.h>
 
@@ -28,11 +30,17 @@ const char* keys =
 
 int main(int argc, char** argv)
 {
-    const char* outFile = "./out.mjpg";
+	char* outFile = "./out.mjpg";
+	
 	int resizeFactor = 1;
     bool doBGS = false;
     bool writeOut = true;
     bool displayWindows = false;
+    
+    bool isOutputColored = !doBGS;
+    
+	if (argv[1])
+		outFile = argv[1];
     
     VideoCapture cap(0); // open the default camera
     if(!cap.isOpened())  // check if we succeeded
@@ -73,6 +81,7 @@ int main(int argc, char** argv)
 		if (counter == 0){
 			time(&start);
 		}
+		Mat output;
         Mat frame;
         cap >> frame; // get a new frame from camera
         
@@ -85,15 +94,18 @@ int main(int argc, char** argv)
 			threshold(foreground, foreground, 128, 255, THRESH_BINARY);
 			erode(foreground, foreground, Mat());
 			
+			output = foreground;
 			if(displayWindows) imshow("Background Subtraction", foreground);
+		} else {
+			output = frameResized;
 		}
         
         if (displayWindows) imshow("Source", frameResized);
         
         if (writeOut) {
-			VideoWriter outStream(outFile, CV_FOURCC('M','J','P','G'), 2, Size(imgSizeX, imgSizeY), true);
+			VideoWriter outStream(outFile, CV_FOURCC('M','J','P','G'), 2, Size(imgSizeX, imgSizeY), isOutputColored);
 			if (outStream.isOpened())
-				outStream.write(frameResized);
+				outStream.write(output);
         }
 		// fps counter begin
 		time(&end);
