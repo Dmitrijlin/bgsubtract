@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     if (argv[2] && strcmp(argv[2], "-bgs") == 0)
 		doBGS = true;
 		
-    VideoCapture cap(0);
+    VideoCapture cap;
     if(!cap.isOpened()){
 		cout<<"Can't open camera!\n";
         return -1;
