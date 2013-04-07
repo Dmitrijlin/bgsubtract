@@ -55,12 +55,25 @@ int main(int argc, char** argv)
     if (argv[2] && strcmp(argv[2], "-bgs") == 0)
 		doBGS = true;
 		
-    VideoCapture cap;
-    if(!cap.isOpened()){
-		cout<<"Can't open camera!\n";
-        return -1;
+	int camIndex = 0;
+	for (int i = 0; i < 5; i++){
+		VideoCapture tmpCap(i);
+		if (tmpCap.isOpened()){
+			camIndex = i;
+			tmpCap.release();
+			cout<<"MESSAGE: using /dev/video"<<i<<endl;
+			break;
+		}
+		tmpCap.release();
 	}
 	
+	VideoCapture cap(camIndex);
+	
+	if (!cap.isOpened()){
+		cout<<"ERROR: /dev/video"<<camIndex<<" fails to open!\n";
+		return -1;
+	}
+
 	/**
 	CommandLineParser parser(argc, argv, keys);
 	if (!parser.check()){
@@ -92,7 +105,8 @@ int main(int argc, char** argv)
 	if (displayWindows) namedWindow("Source",1);
 	if (displayWindows && doBGS) namedWindow("Background Subtraction", 1);
     
-    while(1)
+    // quit if ESC is pressed
+    while((waitKey(10) & 255) != 27)
     {
 		if (counter == 0){
 			time(&start);
@@ -120,8 +134,12 @@ int main(int argc, char** argv)
         
         if (writeOut) {
 			VideoWriter outStream(outFile, CV_FOURCC('M','J','P','G'), 2, Size(imgSizeX, imgSizeY), isOutputColored);
-			if (outStream.isOpened())
+			if (outStream.isOpened()){
 				outStream.write(output);
+			} else {
+				cout<<"ERROR: Can't write to "<<outFile<<"!\n";
+				return -1;
+			}
         }
 		// fps counter begin
 		time(&end);
@@ -132,8 +150,7 @@ int main(int argc, char** argv)
 		cout<<fixed<<fps<<" fps\n";
 		if (counter == (INT_MAX - 1000)) counter = 0;
 		// fps counter end
-		if ( (waitKey(10) & 255) == 27 ) break;
     }
-    // the camera will be deinitialized automatically in VideoCapture destructor
+    cap.release();
     return 0;
 }
